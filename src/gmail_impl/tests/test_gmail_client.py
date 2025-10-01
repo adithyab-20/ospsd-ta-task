@@ -5,6 +5,7 @@ implementation. Tests use mocking to avoid actual Gmail API calls.
 """
 
 import base64
+from collections.abc import Generator
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, Mock, patch
 
@@ -86,7 +87,7 @@ def mock_gmail_service() -> MagicMock:
 
 
 @pytest.fixture(autouse=True)
-def mock_authentication():
+def mock_authentication() -> Generator[None, None, None]:
     """Auto-mock authentication for all unit tests to avoid file dependencies."""
     mock_creds = MagicMock()
     with patch(
