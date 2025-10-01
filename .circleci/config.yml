@@ -48,7 +48,7 @@ jobs:
           name: Run mypy
           command: |
             source $BASH_ENV
-            uv run mypy .
+            uv run mypy src/
 
   test-unit:
     docker:
@@ -243,7 +243,7 @@ jobs:
       - image: cimg/python:3.12
     steps:
       - checkout
-      
+
       # Install uv
       - run:
           name: Install uv
@@ -251,27 +251,27 @@ jobs:
             curl -LsSf https://astral.sh/uv/install.sh | sh
             echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
             source $BASH_ENV
-      
+
       # Cache uv dependencies
       - restore_cache:
           keys:
             - v1-build-deps-{{ checksum "uv.lock" }}
             - v1-build-deps-
-      
+
       # Install dependencies
       - run:
           name: Install dependencies
           command: |
             source $BASH_ENV
             uv sync --extra dev --extra email --extra gmail
-      
+
       # Save cache
       - save_cache:
           paths:
             - .venv
             - ~/.cache/uv
           key: v1-build-deps-{{ checksum "uv.lock" }}
-      
+
       # Build components
       - run:
           name: Build components
@@ -281,12 +281,12 @@ jobs:
             cd src/email_api
             uv build
             cd ../..
-            
+
             # Build gmail-impl component
             cd src/gmail_impl
             uv build
             cd ../..
-      
+
       # Store build artifacts
       - store_artifacts:
           path: src/email_api/dist/
@@ -294,6 +294,53 @@ jobs:
       - store_artifacts:
           path: src/gmail_impl/dist/
           destination: gmail-impl-build
+
+  docs:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+
+      # Install uv
+      - run:
+          name: Install uv
+          command: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
+            source $BASH_ENV
+
+      # Cache uv dependencies
+      - restore_cache:
+          keys:
+            - v1-docs-deps-{{ checksum "uv.lock" }}
+            - v1-docs-deps-
+
+      # Install dependencies
+      - run:
+          name: Install dependencies
+          command: |
+            source $BASH_ENV
+            uv sync --extra dev --extra email --extra gmail
+            uv pip install mkdocs mkdocs-material mkdocstrings[python]
+
+      # Save cache
+      - save_cache:
+          paths:
+            - .venv
+            - ~/.cache/uv
+          key: v1-docs-deps-{{ checksum "uv.lock" }}
+
+      # Build documentation
+      - run:
+          name: Build docs
+          command: |
+            source $BASH_ENV
+            uv run mkdocs build --strict
+
+      # Store documentation artifacts
+      - store_artifacts:
+          path: site/
+          destination: documentation
 
 # Define workflows
 workflows:
@@ -310,7 +357,7 @@ workflows:
           # Only run integration tests on main/develop branches or when explicitly triggered
           filters:
             branches:
-              only: 
+              only:
                 - main
                 - develop
                 - /feature\/.*integration.*/
@@ -321,7 +368,7 @@ workflows:
           # Only run E2E tests on main branch or when explicitly triggered
           filters:
             branches:
-              only: 
+              only:
                 - main
                 - /feature\/.*e2e.*/
                 - /feat\/.*gmail.*/
@@ -330,7 +377,15 @@ workflows:
             - test-unit
           filters:
             branches:
-              only: 
+              only:
+                - main
+                - develop
+      - docs:
+          requires:
+            - lint
+          filters:
+            branches:
+              only:
                 - main
                 - develop
 

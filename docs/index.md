@@ -1,63 +1,101 @@
-# OSPSD - Email Client - TA Assignment Solution
+# Email Client with Dependency Injection
 
-Professional email client implementation using component-based architecture, dependency injection patterns, and modern Python development practices.
+Professional email client implementation using component-based architecture with monkey-patching dependency injection.
 
 ## Overview
 
-A modular email client implementing clean architecture principles and interface design patterns. Built with professional software development standards including comprehensive testing, type safety, and maintainable code structure.
+A modular email client implementing clean architecture principles with a simple yet powerful dependency injection pattern. Built with professional software development standards including comprehensive testing, type safety, and maintainable code structure.
 
-## Architecture
+## Key Features
 
-Component-based system where each component:
-- Defines clear contracts using Python protocols
-- Maintains zero dependencies between interface and implementation
-- Can be independently developed, tested, and published
-- Hides complex functionality behind simple interfaces
+- **Component-Based Architecture**: Independent email_api and gmail_impl components
+- **Monkey-Patching DI**: Simple, direct function replacement for dependency injection
+- **Type Safety**: Full mypy strict mode compliance
+- **Comprehensive Testing**: Unit, integration, and E2E tests
+- **OAuth2 Authentication**: Secure Gmail API access with token caching
 
-### Components
-
-- **email_api**: Core interface component defining email client contracts and data models
-- **gmail_impl**: Gmail implementation component providing OAuth2-authenticated email access
-
-## Project Structure
-
-```
-email-client/
-├── src/
-│   ├── email_api/              # Interface component
-│   ├── gmail_impl/             # Gmail implementation component
-│   └── component.md            # Component development guidelines
-├── tests/                      # Integration/E2E tests
-├── pyproject.toml              # Workspace configuration
-└── main.py                     # Project entry point
-```
-
-## Setup
-
-### Prerequisites
-
-- Python 3.12+
-- [uv](https://docs.astral.sh/uv/) package manager
+## Quick Start
 
 ### Installation
 
 ```bash
 git clone <repository-url>
-cd email-client-system
+cd ospsd-ta-task
 
-# Full development setup
+# Install dependencies
 uv sync --extra dev --extra email --extra gmail
 ```
 
-### Development
+### Basic Usage
+
+```python
+import email_api
+import gmail_impl  # noqa: F401  # Import injects implementation
+
+# Get client (returns GmailClient via DI)
+client = email_api.get_client()
+
+# Fetch emails
+for email in client.get_messages(limit=10):
+    print(f"From: {email.sender}")
+    print(f"Subject: {email.subject}")
+```
+
+## Architecture Highlights
+
+### Component Structure
+
+```
+ospsd-ta-task/
+├── src/
+│   ├── email_api/          # Interface component
+│   │   └── src/email_api/
+│   │       ├── __init__.py
+│   │       └── client.py   # Client ABC, Email, EmailAddress
+│   └── gmail_impl/         # Implementation component
+│       └── src/gmail_impl/
+│           ├── __init__.py  # DI injection happens here
+│           └── gmail_client.py
+├── tests/
+│   ├── integration/        # Real Gmail API tests
+│   └── e2e/                # Subprocess execution tests
+└── main.py                 # Demo application
+```
+
+### Dependency Injection
+
+The project uses **monkey-patching dependency injection**:
+
+1. **email_api** defines `get_client()` that raises `NotImplementedError`
+2. **gmail_impl** imports email_api and replaces `get_client` with `lambda: GmailClient()`
+3. Application code imports both packages and calls `email_api.get_client()`
+
+Benefits:
+- Loose coupling
+- Simple implementation
+- Easy to test
+- Flexible
+
+[Learn more about the DI pattern →](architecture/dependency-injection.md)
+
+## Testing Strategy
+
+- **Unit Tests**: Fast, isolated, mock external dependencies
+- **Integration Tests**: Real Gmail API, validate OAuth2 and data contracts
+- **E2E Tests**: Execute main.py via subprocess, validate complete workflows
+
+[Learn more about testing →](architecture/testing.md)
+
+## Development
 
 ```bash
 # Run all tests
 uv run pytest
 
-# Component-specific tests
-uv run pytest src/email_api/tests/
-uv run pytest src/gmail_impl/tests/
+# Run specific test types
+uv run pytest -m unit
+uv run pytest -m integration
+uv run pytest -m e2e
 
 # Type checking
 uv run mypy src/
@@ -65,48 +103,19 @@ uv run mypy src/
 # Code quality
 uv run ruff check .
 
-# Coverage
-uv run pytest --cov=src --cov-report=html
-
-# Documentation
-uv run mkdocs serve  # Live preview at http://127.0.0.1:8000
-uv run mkdocs build  # Build static site
-
-# Demo
-uv run python main.py
+# Generate docs
+uv run mkdocs serve
 ```
-
-## Usage
-
-```python
-from email_api import EmailClient, Email, EmailAddress
-
-async def process_emails(client: EmailClient) -> None:
-    """Dependency injection pattern - implementation provided externally."""
-    async with client:
-        emails = await client.list_inbox_messages(limit=5)
-        for email in emails:
-            if email.has_content:
-                print(f"From: {email.sender.display_name}")
-                print(f"Subject: {email.subject}")
-```
-
-## Quality Standards
-
-- **Type Safety**: Full mypy strict mode compliance
-- **Code Quality**: All ruff rules enabled with documented exceptions
-- **Test Coverage**: ≥85% coverage requirement
-- **Professional Standards**: Clean, maintainable, production-ready code
 
 ## Technology Stack
 
 - **Language**: Python 3.12+
-- **Package Management**: uv
-- **Testing**: pytest with asyncio and coverage
+- **Package Manager**: uv (workspace-based monorepo)
+- **Testing**: pytest with coverage
 - **Type Checking**: mypy (strict mode)
-- **Code Quality**: ruff
-- **Architecture**: Component-based with dependency injection
+- **Linting**: ruff
+- **Docs**: mkdocs-material
 
 ## License
 
-MIT License - See LICENSE file for details. 
+MIT License - See LICENSE file for details.

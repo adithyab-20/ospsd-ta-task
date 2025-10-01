@@ -1,6 +1,6 @@
 # Getting Started
 
-Quick start guide for setting up and using the Email Client System.
+Quick start guide for setting up and using the Email Client with Dependency Injection.
 
 ## Prerequisites
 
@@ -14,78 +14,84 @@ Quick start guide for setting up and using the Email Client System.
 
 ```bash
 git clone <repository-url>
-cd email-client
+cd ospsd-ta-task
 
 # Install all dependencies
 uv sync --extra dev --extra email --extra gmail
 ```
 
-### 2. Gmail Setup (Optional)
+### 2. Gmail API Setup
 
-If you want to use the Gmail implementation:
+To use the Gmail implementation:
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
 3. Enable the Gmail API
-4. Create OAuth 2.0 credentials for a desktop application
-5. Download the credentials JSON file as `credentials.json`
+4. Go to "APIs & Services" → "Credentials"
+5. Create OAuth 2.0 credentials for a desktop application
+6. Download the credentials JSON file as `credentials.json` in the project root
+7. Configure OAuth consent screen and add your Gmail as a test user
 
 ## Quick Start
 
-### Using the Interface
+### Basic Usage
 
 ```python
-from email_api import EmailClient, Email, EmailAddress
+import email_api
+import gmail_impl  # noqa: F401  # Import injects implementation
 
-async def process_emails(client: EmailClient) -> None:
-    """Process emails using dependency injection."""
-    async with client:
-        emails = await client.list_inbox_messages(limit=5)
-        for email in emails:
-            print(f"From: {email.sender.email}")
-            print(f"Subject: {email.subject}")
+# Get client via dependency injection
+client = email_api.get_client()
+
+# Fetch recent emails
+for email in client.get_messages(limit=5):
+    print(f"From: {email.sender}")
+    print(f"Subject: {email.subject}")
+    print(f"Date: {email.date_sent}")
 ```
 
-### Gmail Implementation
+### Demo Application
 
-```python
-import asyncio
-from gmail_impl import GmailClient, GmailConfig
+Run the included demo:
 
-async def main():
-    config = GmailConfig(
-        credentials_file="credentials.json",
-        token_file="token.json"
-    )
-    
-    async with GmailClient(config) as client:
-        emails = await client.list_inbox_messages(limit=5)
-        print(f"Found {len(emails)} emails")
-
-asyncio.run(main())
+```bash
+uv run python main.py
 ```
+
+This will:
+1. Open browser for OAuth2 authentication (first run only)
+2. Fetch your 5 most recent emails
+3. Display email content
 
 ## Development
 
 ### Running Tests
 
 ```bash
-# All tests
+# All tests (unit + integration + e2e)
 uv run pytest
 
-# Component-specific tests
-uv run pytest src/email_api/tests/
-uv run pytest src/gmail_impl/tests/
+# Unit tests only (fast, no credentials needed)
+uv run pytest -m unit
+
+# Integration tests (requires credentials.json)
+uv run pytest -m integration
+
+# E2E tests (requires credentials.json)
+uv run pytest -m e2e
 ```
 
 ### Code Quality
 
 ```bash
 # Type checking
-uv run mypy .
+uv run mypy src/
 
 # Linting
 uv run ruff check .
+
+# Format code
+uv run ruff format .
 
 # Coverage report
 uv run pytest --cov=src --cov-report=html
@@ -94,15 +100,31 @@ uv run pytest --cov=src --cov-report=html
 ### Documentation
 
 ```bash
-# Serve documentation locally
+# Serve documentation locally at http://127.0.0.1:8000
 uv run mkdocs serve
 
-# Build documentation
+# Build static documentation
 uv run mkdocs build
+```
+
+## Project Structure
+
+```
+ospsd-ta-task/
+├── src/
+│   ├── email_api/          # Interface component
+│   └── gmail_impl/         # Gmail implementation
+├── tests/
+│   ├── integration/        # Integration tests
+│   └── e2e/                # End-to-end tests
+├── docs/                   # Documentation
+├── main.py                 # Demo application
+└── pyproject.toml          # Workspace configuration
 ```
 
 ## Next Steps
 
-- Check out the [API Reference](../reference/interfaces.md) for detailed interface documentation
-- Explore the [Gmail Implementation](../reference/gmail-client.md) for specific Gmail features
-- Review the component guidelines in `src/component.md` 
+- Learn about [Dependency Injection](../architecture/dependency-injection.md)
+- Understand the [Testing Strategy](../architecture/testing.md)
+- Explore the [Email API Reference](../reference/email-api.md)
+- Check out the [Gmail Implementation](../reference/gmail-impl.md)
