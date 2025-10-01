@@ -85,6 +85,17 @@ def mock_gmail_service() -> MagicMock:
     return service
 
 
+@pytest.fixture(autouse=True)
+def mock_authentication():
+    """Auto-mock authentication for all unit tests to avoid file dependencies."""
+    mock_creds = MagicMock()
+    with patch(
+        "gmail_impl.gmail_client.GmailClient._authenticate",
+        return_value=mock_creds,
+    ):
+        yield
+
+
 
 
 class TestGmailClientMessageRetrieval:
