@@ -95,7 +95,6 @@ jobs:
               --cov=src/gmail_impl/src/gmail_impl \
               --cov-report=term-missing \
               --cov-report=html \
-
               --cov-fail-under=80 \
               --junit-xml=test-results/junit.xml
       
