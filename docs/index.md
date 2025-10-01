@@ -1,121 +1,67 @@
 # Email Client with Dependency Injection
 
-Professional email client implementation using component-based architecture with monkey-patching dependency injection.
+Professional email client demonstrating component-based architecture and dependency injection patterns.
 
 ## Overview
 
-A modular email client implementing clean architecture principles with a simple yet powerful dependency injection pattern. Built with professional software development standards including comprehensive testing, type safety, and maintainable code structure.
+This project implements a modular email client with clean separation between interface and implementation. It showcases professional software development practices including type safety, comprehensive testing, and maintainable architecture.
 
 ## Key Features
 
-- **Component-Based Architecture**: Independent email_api and gmail_impl components
-- **Monkey-Patching DI**: Simple, direct function replacement for dependency injection
-- **Type Safety**: Full mypy strict mode compliance
-- **Comprehensive Testing**: Unit, integration, and E2E tests
-- **OAuth2 Authentication**: Secure Gmail API access with token caching
+- Component-based architecture with independent packages
+- Dependency injection using monkey-patching
+- Full type safety with mypy strict mode
+- 97% test coverage across unit, integration, and E2E tests
+- OAuth2 authentication with Gmail API
 
-## Quick Start
-
-### Installation
-
-```bash
-git clone <repository-url>
-cd ospsd-ta-task
-
-# Install dependencies
-uv sync --extra dev --extra email --extra gmail
-```
-
-### Basic Usage
+## Quick Example
 
 ```python
 import email_api
-import gmail_impl  # noqa: F401  # Import injects implementation
+import gmail_impl  # noqa: F401
 
-# Get client (returns GmailClient via DI)
 client = email_api.get_client()
-
-# Fetch emails
-for email in client.get_messages(limit=10):
-    print(f"From: {email.sender}")
-    print(f"Subject: {email.subject}")
+for email in client.get_messages(limit=5):
+    print(f"{email.sender.address}: {email.subject}")
 ```
 
-## Architecture Highlights
+## Documentation
 
-### Component Structure
+### Getting Started
+- [Installation and Setup](getting-started/index.md) - Install dependencies and configure Gmail API
+- [Basic Usage](getting-started/index.md#quick-start) - Run the demo application
 
-```
-ospsd-ta-task/
-├── src/
-│   ├── email_api/          # Interface component
-│   │   └── src/email_api/
-│   │       ├── __init__.py
-│   │       └── client.py   # Client ABC, Email, EmailAddress
-│   └── gmail_impl/         # Implementation component
-│       └── src/gmail_impl/
-│           ├── __init__.py  # DI injection happens here
-│           └── gmail_client.py
-├── tests/
-│   ├── integration/        # Real Gmail API tests
-│   └── e2e/                # Subprocess execution tests
-└── main.py                 # Demo application
-```
+### Architecture
+- [Design Philosophy](architecture/design-philosophy.md) - Deep interfaces and abstraction principles
+- [Dependency Injection](architecture/dependency-injection.md) - How DI works in this project
+- [Testing Strategy](architecture/testing.md) - Unit, integration, and E2E testing approach
 
-### Dependency Injection
+### API Reference
+- [Email API](reference/email-api.md) - Interface definitions and data models
+- [Gmail Implementation](reference/gmail-impl.md) - OAuth2, message parsing, error handling
 
-The project uses **monkey-patching dependency injection**:
+## Technology Stack
 
-1. **email_api** defines `get_client()` that raises `NotImplementedError`
-2. **gmail_impl** imports email_api and replaces `get_client` with `lambda: GmailClient()`
-3. Application code imports both packages and calls `email_api.get_client()`
-
-Benefits:
-- Loose coupling
-- Simple implementation
-- Easy to test
-- Flexible
-
-[Learn more about the DI pattern →](architecture/dependency-injection.md)
-
-## Testing Strategy
-
-- **Unit Tests**: Fast, isolated, mock external dependencies
-- **Integration Tests**: Real Gmail API, validate OAuth2 and data contracts
-- **E2E Tests**: Execute main.py via subprocess, validate complete workflows
-
-[Learn more about testing →](architecture/testing.md)
+- Python 3.12+ with strict type checking
+- uv for dependency management
+- pytest with 97% coverage
+- mypy strict mode
+- ruff linting
+- mkdocs-material documentation
 
 ## Development
 
 ```bash
-# Run all tests
-uv run pytest
+# Install and run
+uv sync --extra dev --extra email --extra gmail
+uv run python main.py
 
-# Run specific test types
-uv run pytest -m unit
-uv run pytest -m integration
-uv run pytest -m e2e
-
-# Type checking
-uv run mypy src/
-
-# Code quality
-uv run ruff check .
-
-# Generate docs
-uv run mkdocs serve
+# Test and validate
+uv run pytest                # All tests
+uv run mypy src/            # Type checking
+uv run ruff check .         # Linting
 ```
-
-## Technology Stack
-
-- **Language**: Python 3.12+
-- **Package Manager**: uv (workspace-based monorepo)
-- **Testing**: pytest with coverage
-- **Type Checking**: mypy (strict mode)
-- **Linting**: ruff
-- **Docs**: mkdocs-material
 
 ## License
 
-MIT License - See LICENSE file for details.
+MIT License

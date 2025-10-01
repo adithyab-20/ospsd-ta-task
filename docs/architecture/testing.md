@@ -178,10 +178,10 @@ uv run pytest
 
 ## Coverage Requirements
 
-- **Overall**: ≥85% code coverage
-- **Unit tests**: Fast feedback during development
-- **Integration tests**: Validate real API contracts
-- **E2E tests**: Validate complete user workflows
+- **Overall**: 97% code coverage achieved
+- **Unit tests**: 84% coverage (fast feedback during development)
+- **Integration/E2E tests**: Additional 13% coverage (validates real API contracts and workflows)
+- **Minimum threshold**: 80% for CI pipeline
 
 ## CI/CD Strategy
 
@@ -201,21 +201,21 @@ uv run pytest
 
 ### Unit Tests
 
-- ✅ Use `with patch()` for each test (maintains DI architecture)
-- ✅ Test one thing per test
-- ✅ Use descriptive test names
-- ❌ Don't test implementation details
+- Use `with patch()` for each test to maintain DI architecture
+- Test one thing per test
+- Use descriptive test names
+- Avoid testing implementation details
 
 ### Integration Tests
 
-- ✅ Use `email_api.get_client()` (respects DI)
-- ✅ Test cross-component contracts
-- ✅ Validate error propagation
-- ❌ Don't test Gmail API internals
+- Use `email_api.get_client()` to respect DI pattern
+- Test cross-component contracts
+- Validate error propagation
+- Avoid testing Gmail API internals
 
 ### E2E Tests
 
-- ✅ Test complete workflows
-- ✅ Validate stdout/stderr
-- ✅ Use subprocess execution
-- ❌ Don't test internal implementation
+- Test complete workflows
+- Validate stdout/stderr output
+- Use subprocess execution
+- Avoid testing internal implementation

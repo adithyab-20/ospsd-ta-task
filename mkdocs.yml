@@ -81,8 +81,9 @@ nav:
   - Getting Started:
     - Installation: getting-started/index.md
   - Architecture:
-    - Dependency Injection: architecture/dependency-injection.md
-    - Testing Strategy: architecture/testing.md
+      - Design Philosophy: architecture/design-philosophy.md
+      - Dependency Injection: architecture/dependency-injection.md
+      - Testing Strategy: architecture/testing.md
   - API Reference:
     - Email API: reference/email-api.md
     - Gmail Implementation: reference/gmail-impl.md

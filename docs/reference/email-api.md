@@ -49,7 +49,7 @@ client = email_api.get_client()
 
 # Fetch messages
 for email in client.get_messages(limit=10):
-    print(f"From: {email.sender}")
+    print(f"From: {email.sender.address}")
     print(f"Subject: {email.subject}")
     print(f"Date: {email.date_sent}")
 
@@ -60,7 +60,7 @@ for email in client.get_messages(limit=10):
 
     # Access recipients
     for recipient in email.recipients:
-        print(f"To: {recipient}")
+        print(f"To: {recipient.address}")
 ```
 
 ## Data Model Details

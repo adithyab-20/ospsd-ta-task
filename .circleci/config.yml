@@ -215,12 +215,12 @@ jobs:
           command: |
             # Create credentials.json from environment variable
             echo "$GMAIL_CREDENTIALS_JSON" > credentials.json
-            
-            # Create E2E token file from environment variable if provided
-            if [ ! -z "$GMAIL_E2E_TOKEN_JSON" ]; then
-              echo "$GMAIL_E2E_TOKEN_JSON" > e2e_token.json
+
+            # Create token.json from environment variable if provided
+            if [ ! -z "$GMAIL_CI_TOKEN_JSON" ]; then
+              echo "$GMAIL_CI_TOKEN_JSON" > token.json
             fi
-      
+
       # Run E2E tests
       - run:
           name: Run E2E tests

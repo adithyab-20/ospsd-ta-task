@@ -1,6 +1,6 @@
 # Dependency Injection Pattern
 
-This project uses **monkey-patching dependency injection** - a simple and elegant pattern for loose coupling.
+This project uses **dependency injection** 
 
 ## How It Works
 
@@ -67,33 +67,6 @@ client = email_api.get_client()
 assert client is mock_client
 ```
 
-### 4. Flexible
-Swap implementations by changing which package you import:
-
-```python
-import email_api
-
-# Uncomment the implementation you want:
-import gmail_impl  # noqa: F401
-# import outlook_impl  # noqa: F401
-# import mock_impl  # noqa: F401
-
-client = email_api.get_client()  # Gets the imported implementation
-```
-
-## Comparison to Registry Pattern
-
-**Monkey-Patching (This Approach):**
-
-- ✅ Simpler - no registry logic needed
-- ✅ Direct - obvious what's happening
-- ✅ Less code - just function replacement
-
-**Registry Pattern:**
-
-- ❌ More complex - needs `register_client()` function
-- ❌ Extra indirection - function calls registry
-- ❌ Over-engineered for this use case
 
 ## Testing Patterns
 
@@ -125,15 +98,6 @@ def test_real_gmail_integration():
     messages = list(client.get_messages(limit=1))
     assert isinstance(messages, list)
 ```
-
-## Design Principles
-
-This pattern follows John Ousterhout's interface design principles:
-
-1. **Deep Modules**: Simple interface hides complex implementation
-2. **Information Hiding**: Application doesn't know about Gmail API details
-3. **Define Errors Out of Existence**: Import the implementation → it just works
-4. **Pull Complexity Downward**: Implementation handles OAuth, API calls, parsing
 
 ## Environment Configuration
 

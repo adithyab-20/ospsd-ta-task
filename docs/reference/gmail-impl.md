@@ -67,7 +67,7 @@ client = email_api.get_client()
 
 # Use the client
 for email in client.get_messages(limit=10):
-    print(f"From: {email.sender}")
+    print(f"From: {email.sender.address}")
     print(f"Subject: {email.subject}")
 ```
 
