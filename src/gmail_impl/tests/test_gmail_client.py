@@ -121,6 +121,7 @@ class TestGmailClientMessageRetrieval:
     def test_get_messages_returns_single_email_with_correct_data(
         self,
         mock_gmail_service,
+        mock_authentication,
     ) -> None:
         """Test retrieving single email with all fields."""
         mock_gmail_service.users().messages().list().execute.return_value = {
@@ -150,7 +151,7 @@ class TestGmailClientMessageRetrieval:
             assert email.date_sent == datetime(2024, 1, 15, 10, 30, tzinfo=UTC)
 
     def test_get_messages_returns_multiple_emails_in_order(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test retrieving multiple emails returns all messages in correct order."""
         mock_gmail_service.users().messages().list().execute.return_value = {
@@ -174,7 +175,7 @@ class TestGmailClientMessageRetrieval:
             assert messages[1].subject == "Second Email"
 
     def test_get_messages_with_limit_returns_specified_number(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test get_messages with limit parameter returns exact count requested."""
         # Setup: 3 messages available, limit to 2
@@ -198,7 +199,7 @@ class TestGmailClientMessageRetrieval:
             assert messages[1].id == "msg1"
 
     def test_get_messages_with_zero_limit_returns_empty(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test get_messages with limit=0 returns no messages."""
         mock_gmail_service.users().messages().list().execute.return_value = {
@@ -214,7 +215,7 @@ class TestGmailClientMessageRetrieval:
             assert len(messages) == 0
 
     def test_get_messages_returns_iterator_not_list(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test that get_messages returns an iterator for lazy evaluation."""
         with patch(
@@ -232,7 +233,7 @@ class TestGmailClientEmailParsing:
     """Test cases for parsing various email formats."""
 
     def test_get_messages_parses_email_with_multiple_recipients(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test parsing email with multiple recipients in various formats."""
         message_data = {
@@ -277,7 +278,7 @@ class TestGmailClientEmailParsing:
             assert email.recipients[2].name == "Charlie"
 
     def test_get_messages_parses_html_email_converts_to_text(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test HTML email body is converted to plain text."""
         html_content = "<h1>Title</h1><p>This is a <b>test</b> message.</p>"
@@ -318,7 +319,7 @@ class TestGmailClientEmailParsing:
             assert "test" in email.body
 
     def test_get_messages_parses_multipart_email_prefers_plain_text(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test multipart email extraction prefers plain text over HTML."""
         text_content = "Plain text version"
@@ -370,7 +371,7 @@ class TestGmailClientEmailParsing:
             assert email.body == "Plain text version"
 
     def test_get_messages_handles_empty_body(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test email with no body content returns empty string."""
         message_data = {
@@ -402,7 +403,7 @@ class TestGmailClientEmailParsing:
             assert email.body == ""
 
     def test_get_messages_handles_missing_subject_header(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test email without Subject header defaults to empty string."""
         message_data = {
@@ -438,7 +439,7 @@ class TestGmailClientErrorHandling:
     """Test cases for error handling during email retrieval."""
 
     def test_get_messages_raises_runtime_error_on_401_unauthorized(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test HTTP 401 Unauthorized error raises RuntimeError."""
         mock_gmail_service.users().messages().list().execute.side_effect = HttpError(
@@ -453,7 +454,7 @@ class TestGmailClientErrorHandling:
                 list(client.get_messages())
 
     def test_get_messages_raises_runtime_error_on_403_forbidden(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test HTTP 403 Forbidden error raises RuntimeError."""
         mock_gmail_service.users().messages().list().execute.side_effect = HttpError(
@@ -468,7 +469,7 @@ class TestGmailClientErrorHandling:
                 list(client.get_messages())
 
     def test_get_messages_raises_connection_error_on_500_server_error(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test HTTP 500 Internal Server Error raises ConnectionError."""
         mock_gmail_service.users().messages().list().execute.side_effect = HttpError(
@@ -483,7 +484,7 @@ class TestGmailClientErrorHandling:
                 list(client.get_messages())
 
     def test_get_messages_raises_connection_error_on_404_not_found(
-        self, mock_gmail_service, mock_authentication,
+        self, mock_gmail_service,
     ) -> None:
         """Test HTTP 404 Not Found error raises ConnectionError."""
         mock_gmail_service.users().messages().list().execute.side_effect = HttpError(
